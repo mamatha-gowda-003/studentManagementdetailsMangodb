@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            padding: 30px;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+        }
+        .add-btn {
+            background: #5b67f1;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        table {
+            margin-top: 20px;
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .edit-btn { background: #007bff; }
+        .delete-btn { background: #e60000; }
+    </style>
+</head>
+
+<body>
+
+<div class="top-bar">
+    <h1>Student Records</h1>
+    <a class="add-btn" href="add.html">➕ Add New Student</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody id="studentTable"></tbody>
+</table>
+
+<script>
+    const API_URL = "http://localhost:5000";
+
+    async function loadStudents() {
+        try {
+            const res = await fetch(`${API_URL}/students`);
+            if (res.ok) {
+                const data = await res.json();
+
+                let rows = "";
+                data.forEach(stu => {
+                    rows += `
+            <tr>
+                <td>${stu.name}</td>
+                <td>${stu.age}</td>
+                <td><button class="edit-btn" onclick="goToEdit('${stu._id}')">Edit</button></td>
+                <td><button class="delete-btn" onclick="deleteStudent('${stu._id}')">Delete</button></td>
+            </tr>`;
+                });
+
+                document.getElementById("studentTable").innerHTML = rows;
+            } else {
+                document.getElementById("studentTable").innerHTML = `<tr><td colspan="4">Error loading students: ${res.status}</td></tr>`;
+            }
+        } catch (error) {
+            document.getElementById("studentTable").innerHTML = `<tr><td colspan="4">Error loading students: ${error.message}</td></tr>`;
+        }
+    }
+
+    function goToEdit(id) {
+        window.location.href = `edit.html?id=${id}`;
+    }
+
+    async function deleteStudent(id) {
+        await fetch(`${API_URL}/students/delete/${id}`, { method: "DELETE" });
+        loadStudents();
+    }
+
+    loadStudents();
+</script>
+
+</body>
+</html>
